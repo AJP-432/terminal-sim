@@ -31,7 +31,7 @@ def is_in_bounds(loc: tuple[int, int]) -> bool:
     
     """
     x, y = loc
-    half_board = HALF_ARENA
+    half_board = HALF_ARENA                                                     
 
     row_size = y + 1
     startx = half_board - row_size
@@ -62,7 +62,7 @@ def get_quadrant(loc: tuple[int, int]) -> MapEdges:
 def get_edge_locations(quadrant: MapEdges) -> list[tuple[int, int]]:
     return get_edges()[quadrant.value]
 
-def get_edges(self) -> list[list[tuple[int, int]]]:
+def get_edges() -> list[list[tuple[int, int]]]:
     """Gets all of the edges and their edge locations
 
     Returns:
@@ -71,28 +71,28 @@ def get_edges(self) -> list[list[tuple[int, int]]]:
     """
     # assume 0,0 is bottom left
     top_right = []
-    for num in range(0, self.HALF_ARENA):
-        x = self.HALF_ARENA + num
-        y = self.ARENA_SIZE - 1 - num
+    for num in range(0, HALF_ARENA):
+        x = HALF_ARENA + num
+        y = ARENA_SIZE - 1 - num
         top_right.append([int(x), int(y)])
     top_left = []
-    for num in range(0, self.HALF_ARENA):
-        x = self.HALF_ARENA - 1 - num
-        y = self.ARENA_SIZE - 1 - num
+    for num in range(0, HALF_ARENA):
+        x = HALF_ARENA - 1 - num
+        y = ARENA_SIZE - 1 - num
         top_left.append([int(x), int(y)])
     bottom_left = []
-    for num in range(0, self.HALF_ARENA):
-        x = self.HALF_ARENA - 1 - num
+    for num in range(0, HALF_ARENA):
+        x = HALF_ARENA - 1 - num
         y = num
         bottom_left.append([int(x), int(y)])
     bottom_right = []
-    for num in range(0, self.HALF_ARENA):
-        x = self.HALF_ARENA + num
+    for num in range(0, HALF_ARENA):
+        x = HALF_ARENA + num
         y = num
         bottom_right.append([int(x), int(y)])
     return [top_right, top_left, bottom_left, bottom_right]
 
-def distance_between_locations(self, loc_1: tuple[int, int], loc_2: tuple[int, int]) -> float:
+def distance_between_locations(loc_1: tuple[int, int], loc_2: tuple[int, int]) -> float:
     """Euclidean distance
 
     Args:
@@ -108,17 +108,17 @@ def distance_between_locations(self, loc_1: tuple[int, int], loc_2: tuple[int, i
 
     return math.sqrt((x1 - x2)**2 + (y1 - y2)**2)
 
-def distance_to_closest_edge(self, x: int, y: int) -> float:
+def distance_to_closest_edge(x: int, y: int) -> float:
     """Calculates the distance from a location to the closest edge"""
-    quadrant = self.get_quadrant(x, y)
-    edge_locations = self.get_edge_locations(quadrant)
+    quadrant = get_quadrant(x, y)
+    edge_locations = get_edge_locations(quadrant)
     min_distance = float("inf")
     for edge_location in edge_locations:
-        distance = self.distance_between_locations((x, y), edge_location)
+        distance = distance_between_locations((x, y), edge_location)
         min_distance = min(min_distance, distance)
     return min_distance
 
-def get_locations_in_range(self, location: tuple[int, int], radius: float) -> list[tuple[int, int]]:
+def get_locations_in_range(location: tuple[int, int], radius: float) -> list[tuple[int, int]]:
     """Gets locations in a circular area around a location
 
     Args:
@@ -129,10 +129,8 @@ def get_locations_in_range(self, location: tuple[int, int], radius: float) -> li
         The locations that are within our search area
 
     """
-    if radius < 0 or radius > self.ARENA_SIZE:
-        self.warn("Radius {} was passed to get_locations_in_range. Expected integer between 0 and {}".format(radius, self.ARENA_SIZE))
-    if not self.is_in_bounds(location[0], location[1]):
-        self._invalid_coordinates(location)
+    if not is_in_bounds(location[0], location[1]):
+        raise IndexError("Location out of bounds")
 
     x, y = location
     locations = []
@@ -142,6 +140,6 @@ def get_locations_in_range(self, location: tuple[int, int], radius: float) -> li
         for j in range(int(y - search_radius), int(y + search_radius + 1)):
             new_location = (i, j)
             # A unit with a given range affects all locations whose centers are within that range + get hit radius
-            if is_in_bounds(new_location[0], new_location[1]) and self.distance_between_locations(location, new_location) < radius + getHitRadius:
+            if is_in_bounds(new_location[0], new_location[1]) and distance_between_locations(location, new_location) < radius + getHitRadius:
                 locations.append(new_location)
     return locations
