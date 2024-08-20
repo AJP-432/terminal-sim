@@ -1,4 +1,6 @@
 import pytest
+import sys # added!
+sys.path.append("..") # added!
 from map import Map
 from constants import *
 

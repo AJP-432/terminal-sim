@@ -1,4 +1,6 @@
 import pytest
+import sys # added!
+sys.path.append("..") # added!
 from unit import Unit, Wall, Support, Turret, Scout
 from constants import UnitType, ARENA_SIZE
 
