@@ -1,7 +1,7 @@
 import pytest
 import sys # added!
 sys.path.append("..") # added!
-from map import Map
+from game_map import Map
 from constants import *
 
 def test_map_initialization():

@@ -1,5 +1,11 @@
 import pygame
 from constants import *
+from game_map import Map
+from unit import Unit
+
+PLAYER_1_COLOR = (0, 0, 255)  # Blue
+PLAYER_2_COLOR = (255, 165, 0)  # Orange
+UPGRADE_RING_COLOR = (255, 255, 0)  # Yellow
 
 class Drawer:
     _instance = None
@@ -41,22 +47,54 @@ class Drawer:
         # Store the pairs as tuples in a set
         self.edge_locations = set(paired_list)
 
-    def draw_board(self):
-        """Draw the board with dots representing valid locations."""
+    def draw_unit(self, unit: Unit, cell_x, cell_y, size=20):
+        """Draws a unit on the screen centered in its grid cell."""
+        color = PLAYER_1_COLOR if unit.player_index == 1 else PLAYER_2_COLOR
+        
+        # Calculate the center position for the unit in the grid cell
+        center_x = cell_x + self.CELL_SIZE // 2
+        center_y = cell_y + self.CELL_SIZE // 2
+
+        if unit.get_unit_type() == UnitType.TURRET:
+            pygame.draw.rect(self.win, color, pygame.Rect(
+                center_x - size // 2, center_y - size // 2, size, size))
+        elif unit.get_unit_type() == UnitType.SUPPORT:
+            pygame.draw.circle(self.win, color, (center_x, center_y), size // 2)
+        elif unit.get_unit_type() == UnitType.WALL:
+            pygame.draw.circle(self.win, color, (center_x, center_y), size // 4)
+        elif unit.get_unit_type() == UnitType.SCOUT:
+            pygame.draw.line(self.win, color, (center_x - size // 2, center_y - size // 2), 
+                             (center_x + size // 2, center_y + size // 2), 3)
+            pygame.draw.line(self.win, color, (center_x - size // 2, center_y + size // 2), 
+                             (center_x + size // 2, center_y - size // 2), 3)
+        
+        # Draw upgrade ring if the unit is upgraded
+        if unit.is_upgraded():
+            pygame.draw.circle(self.win, UPGRADE_RING_COLOR, (center_x, center_y), size, 2)
+    
+    def draw_board(self, game_map: Map):
+        """Draw the board with dots representing valid locations and units."""
         self.win.fill((0, 0, 0))  # Clear the screen with black
 
         for y in range(ARENA_SIZE):
             for x in range(ARENA_SIZE):
-                if is_in_bounds((x, y)):
-                    # Invert the y-coordinate to flip the board vertically
-                    screen_y = ARENA_SIZE - 1 - y
+                cell_x = x * self.CELL_SIZE
+                cell_y = y * self.CELL_SIZE
+
+                # Invert the y-coordinate to flip the board vertically
+                screen_y = ARENA_SIZE - 1 - y
+                if is_in_bounds((x, y)) and game_map.is_empty((x, y)):
                     pygame.draw.circle(
                         self.win,
                         (self.DOT_COLOR if (x, y) not in self.edge_locations else (255, 0, 0)),
-                        (x * self.CELL_SIZE + self.CELL_SIZE // 2, screen_y * self.CELL_SIZE + self.CELL_SIZE // 2),
+                        (cell_x + self.CELL_SIZE // 2, screen_y * self.CELL_SIZE + self.CELL_SIZE // 2),
                         self.DOT_RADIUS
                     )
-
+                
+                elif is_in_bounds((x, y)) and not game_map.is_empty((x, y)):
+                    unit = list(game_map[x, y])[0]
+                    self.draw_unit(unit, cell_x, screen_y * self.CELL_SIZE)
+ 
     def display_coordinates(self):
         """Display the coordinates of the hovered spot at the bottom of the GUI."""
         mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -73,11 +111,7 @@ class Drawer:
 
     def update_display(self, game_map):
         """Update the display with the current state of the game map."""
-        self.draw_board()  # Draw the base board with dots
-
-        # Here you would add code to draw the units based on the game_map
-        # For example, iterating through the map and drawing units at their locations
-
+        self.draw_board(game_map)  # Draw the base board with dots
         self.display_coordinates()  # Show coordinates of the hovered spot
         pygame.display.flip()  # Refresh the display
 

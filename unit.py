@@ -11,6 +11,7 @@ class Unit(ABC):
         self.player_index = player_index
         self.loc = loc
         self.hp = hp
+        self.upgraded = False
 
         assert self.loc[1] < 14 if self.player_index == 0 else self.loc[1] >= 14
     
@@ -22,10 +23,22 @@ class Unit(ABC):
 
     def is_dead(self) -> bool:
         return self.hp <= 0
+
+    def is_upgraded(self) -> bool:
+        return self.upgraded
+
+    def get_unit_type(self) -> UnitType:
+        return self.unit_type
+
+    def get_loc(self) -> tuple[int, int]:
+        return self.loc
         
 class Wall(Unit):
     def __init__(self, player_index: Literal[0, 1], loc: tuple[int, int], hp: float) -> None:
         super().__init__(UnitType.WALL, player_index, loc, hp)
+    
+    def upgrade(self):
+        self.upgraded = True
     
 class Support(Unit):
     def __init__(self, player_index: Literal[0, 1], loc: tuple[int, int], hp: float) -> None:
@@ -38,6 +51,7 @@ class Support(Unit):
         self.shield = 5
         self.range = 6
         self.bonus_shield = 0.3
+        self.upgraded = True
     
     def give_shield(self):
         y = self.loc[1]
@@ -52,6 +66,7 @@ class Turret(Unit):
     def upgrade(self) -> None:
         self.damage = 14
         self.range = 4.5
+        self.upgraded = True
     
     def give_damage(self):
         return self.damage
