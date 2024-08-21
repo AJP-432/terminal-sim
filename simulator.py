@@ -1,15 +1,11 @@
-import pygame
 from game_map import Map
 from navigation import ShortestPathFinder
-from drawer import Drawer
-import time
 from unit import *
 
 class Simulator:
     def __init__(self, action_frame: dict):
         self.action_frame = action_frame
         self.game_map = Map()
-        self.drawer = Drawer.get_instance(self.game_map)
         self.nav = ShortestPathFinder()
         self.game_map.initialize_map(self.action_frame)
         self.frame = 0
@@ -33,9 +29,31 @@ class Simulator:
                 unit.set_path(path)
                 start_loc_to_path[unit.start_loc] = path
     
+    def self_destruct_scouts(self, loc):
+        to_remove = set()
+        for unit in self.game_map[loc]:
+            if unit.unit_type == UnitType.SCOUT:
+                self.scout_count -= 1
+                unit.pending_removal = True
+        
+                to_remove.add(unit)
+        
+        return to_remove
+    
+    def breach(self, loc):
+        to_remove = set()
+        for unit in self.game_map[loc]:
+            if unit.unit_type == UnitType.SCOUT:
+                self.scout_count -= 1
+                self.enemy_damage += 1
+                unit.pending_removal = True
+
+                to_remove.add(unit)
+            
+        return to_remove
+
     def run_frame(self):
         self.frame += 1
-        self.drawer.update_display(self.game_map)
 
         # Shielding
         for unit in self.game_map.all_units:
@@ -53,12 +71,18 @@ class Simulator:
         to_remove = set()
         for unit in self.game_map.all_units:
             if unit.unit_type == UnitType.SCOUT:
+                if unit.pending_removal: 
+                    continue
+
                 if unit.path_empty(): 
-                    self.game_map.remove_unit(unit.get_loc(), unit)
-                    to_remove.add(unit)
-                    if unit.unit_type == UnitType.SCOUT:
-                        self.scout_count -= 1
-                        self.enemy_damage += 1
+                    # We are completely blocked in, self-destruct
+                    if unit.get_loc() not in unit.end_edge_locations:
+                        to_remove = to_remove.union(self.self_destruct_scouts(unit.get_loc()))
+                        continue
+                    
+                    # Breached!
+                    else: 
+                        to_remove = to_remove.union(self.breach(unit.get_loc()))
                 else:
                     curr_loc = unit.get_loc()
                     next_loc = unit.next_step()
@@ -68,6 +92,7 @@ class Simulator:
         
         for unit in to_remove:
             self.game_map.all_units.remove(unit)
+            self.game_map.remove_unit(unit.get_loc(), unit)
         
         # Attacking
         pending_removal = set()
@@ -98,16 +123,7 @@ class Simulator:
     
     def run(self):
         while self.scout_count > 0:
-            time.sleep(0.2)
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
-            
             self.run_frame()
-        
-        time.sleep(3)
-        
-        self.drawer.quit()
     
     def summarize(self):
         return self.enemy_damage 

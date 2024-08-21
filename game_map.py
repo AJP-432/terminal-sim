@@ -81,11 +81,13 @@ class Map:
         # Upgrades
         for x, y, _, _ in action_frame["p1Units"][7]:
             for u in self[(x, y)]:
-                u.upgrade()
+                if u.unit_type != UnitType.SCOUT: 
+                    u.upgrade()
         
         for x, y, _, _ in action_frame["p2Units"][7]:
             for u in self[(x, y)]:
-                u.upgrade()
+                if u.unit_type != UnitType.SCOUT:
+                    u.upgrade()
 
     def find_target(self, unit: Unit) -> Unit:
         locs_in_range = get_locations_in_range(unit.get_loc(), unit.get_range())

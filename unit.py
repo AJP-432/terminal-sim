@@ -95,6 +95,7 @@ class Scout(Unit):
         self.range = 4.5
         self.end_edge_locations = end_edge_locations(get_quadrant(loc))
         self.path: queue = []
+        self.pending_removal = False
     
     def give_damage(self):
         return self.damage
