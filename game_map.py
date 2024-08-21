@@ -116,7 +116,7 @@ class Map:
 
                         elif target.get_loc()[1] == best_target.get_loc()[1]:
                             # 5. Closest to an Edge
-                            if self.distance_to_closest_edge(target.get_loc()) < self.distance_to_closest_edge(best_target.get_loc()):
+                            if distance_to_closest_edge(target.get_loc()) < distance_to_closest_edge(best_target.get_loc()):
                                 best_target = target
 
         return best_target

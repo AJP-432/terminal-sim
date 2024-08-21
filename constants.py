@@ -118,9 +118,10 @@ def distance_between_locations(loc_1: tuple[int, int], loc_2: tuple[int, int]) -
 
     return math.sqrt((x1 - x2)**2 + (y1 - y2)**2)
 
-def distance_to_closest_edge(x: int, y: int) -> float:
+def distance_to_closest_edge(loc) -> float:
     """Calculates the distance from a location to the closest edge"""
-    quadrant = get_quadrant(x, y)
+    x, y = loc
+    quadrant = get_quadrant((x, y))
     edge_locations = get_edge_locations(quadrant)
     min_distance = float("inf")
     for edge_location in edge_locations:

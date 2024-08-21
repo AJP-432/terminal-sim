@@ -8,8 +8,8 @@ from unit import *
 class Simulator:
     def __init__(self, action_frame: dict):
         self.action_frame = action_frame
-        self.drawer = Drawer.get_instance()
         self.game_map = Map()
+        self.drawer = Drawer.get_instance(self.game_map)
         self.nav = ShortestPathFinder()
         self.game_map.initialize_map(self.action_frame)
         self.frame = 0
@@ -98,11 +98,16 @@ class Simulator:
     
     def run(self):
         while self.scout_count > 0:
-            time.sleep(0.1)
+            time.sleep(0.2)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
             
             self.run_frame()
         
+        time.sleep(3)
+        
         self.drawer.quit()
+    
+    def summarize(self):
+        return self.enemy_damage 

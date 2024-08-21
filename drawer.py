@@ -6,22 +6,24 @@ from unit import Unit
 PLAYER_1_COLOR = (0, 0, 255)  # Blue
 PLAYER_2_COLOR = (255, 165, 0)  # Orange
 UPGRADE_RING_COLOR = (255, 255, 0)  # Yellow
+STACK_COUNT_COLOR = (255, 0, 255)  # Bright Purple
 
 class Drawer:
     _instance = None
 
     @staticmethod
-    def get_instance():
+    def get_instance(game_map=None):
         if Drawer._instance is None:
-            Drawer()
+            Drawer(game_map)
         return Drawer._instance
 
-    def __init__(self):
+    def __init__(self, game_map: Map):
         if Drawer._instance is not None:
             raise Exception("This class is a singleton!")
         else:
             Drawer._instance = self
 
+        self.game_map = game_map
         # Initialize Pygame
         pygame.init()
 
@@ -67,6 +69,11 @@ class Drawer:
                              (center_x + size // 2, center_y + size // 2), 3)
             pygame.draw.line(self.win, color, (center_x - size // 2, center_y + size // 2), 
                              (center_x + size // 2, center_y - size // 2), 3)
+        
+            if len(self.game_map[(unit.get_loc())]) > 1:
+                font = pygame.font.SysFont(None, 24)
+                count_text = font.render(str(len(self.game_map[(unit.get_loc())])), True, STACK_COUNT_COLOR)
+                self.win.blit(count_text, (center_x + size // 2 - 10, center_y + size // 2 - 10))
         
         # Draw upgrade ring if the unit is upgraded
         if unit.is_upgraded():
