@@ -86,7 +86,7 @@ class Drawer:
                 if is_in_bounds((x, y)) and game_map.is_empty((x, y)):
                     pygame.draw.circle(
                         self.win,
-                        (self.DOT_COLOR if (x, y) not in self.edge_locations else (255, 0, 0)),
+                        ((255, 0, 0) if (x, y) in self.edge_locations else self.DOT_COLOR if y <= 13 else (0, 70, 0)),
                         (cell_x + self.CELL_SIZE // 2, screen_y * self.CELL_SIZE + self.CELL_SIZE // 2),
                         self.DOT_RADIUS
                     )

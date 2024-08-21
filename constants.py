@@ -2,8 +2,8 @@ import math
 from enum import Enum
 
 class MapEdges(Enum):
-    TOP_LEFT = 0
-    TOP_RIGHT = 1
+    TOP_RIGHT = 0
+    TOP_LEFT = 1
     BOTTOM_LEFT = 2
     BOTTOM_RIGHT = 3
 
@@ -61,6 +61,16 @@ def get_quadrant(loc: tuple[int, int]) -> MapEdges:
 
 def get_edge_locations(quadrant: MapEdges) -> list[tuple[int, int]]:
     return get_edges()[quadrant.value]
+
+def end_edge_locations(quadrant: MapEdges) -> list[tuple[int, int]]:
+    if quadrant == MapEdges.TOP_RIGHT:
+        return get_edges()[MapEdges.BOTTOM_LEFT.value]
+    if quadrant == MapEdges.TOP_LEFT:
+        return get_edges()[MapEdges.BOTTOM_RIGHT.value]
+    if quadrant == MapEdges.BOTTOM_LEFT:
+        return get_edges()[MapEdges.TOP_RIGHT.value]
+    if quadrant == MapEdges.BOTTOM_RIGHT:
+        return get_edges()[MapEdges.TOP_LEFT.value]
 
 def get_edges() -> list[list[tuple[int, int]]]:
     """Gets all of the edges and their edge locations
@@ -129,7 +139,7 @@ def get_locations_in_range(location: tuple[int, int], radius: float) -> list[tup
         The locations that are within our search area
 
     """
-    if not is_in_bounds(location[0], location[1]):
+    if not is_in_bounds((location[0], location[1])):
         raise IndexError("Location out of bounds")
 
     x, y = location
@@ -140,6 +150,6 @@ def get_locations_in_range(location: tuple[int, int], radius: float) -> list[tup
         for j in range(int(y - search_radius), int(y + search_radius + 1)):
             new_location = (i, j)
             # A unit with a given range affects all locations whose centers are within that range + get hit radius
-            if is_in_bounds(new_location[0], new_location[1]) and distance_between_locations(location, new_location) < radius + getHitRadius:
+            if is_in_bounds((new_location[0], new_location[1])) and distance_between_locations(location, new_location) < radius + getHitRadius:
                 locations.append(new_location)
     return locations
